@@ -24,18 +24,23 @@ struct DataTable: NSViewRepresentable {
 
         func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
             let identifier = tableColumn!.identifier.rawValue
-            let item: Double
+            let item: String
             if identifier == "index" {
-                item = data[row].id
+                item = String(format: "%.0f", data[row].id)
             } else {
                 let index = Int(identifier)!
-                item = data[row].values[index]
+                item = String(format: "%.6f", data[row].values[index])
             }
             let text = NSTextField(labelWithString: String(item))
+            text.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
             let rowHeight = tableColumn!.tableView!.rowHeight
             let colWidth = tableColumn!.width
             let textHeight = text.sizeThatFits(NSSize(width: 100, height: 100)).height
-            text.frame = .init(x: 0.0, y: rowHeight / 2 - textHeight / 2, width: colWidth, height: textHeight)
+            text.frame = .init(x: 0, y: rowHeight / 2 - textHeight / 2, width: colWidth, height: textHeight)
+            let ps = NSMutableParagraphStyle()
+            ps.alignment = .right
+            let string = NSAttributedString(string: String(item), attributes: [.paragraphStyle: ps])
+            text.attributedStringValue = string
             let cell = NSTableCellView()
             cell.addSubview(text)
             return cell
@@ -64,8 +69,10 @@ struct DataTable: NSViewRepresentable {
                 let column = NSTableColumn(identifier: .init(identifier))
                 column.title = header
                 column.resizingMask = .autoresizingMask
+                column.width = identifier == "index" ? 30 : 100
+                column.maxWidth = identifier == "index" ? 30 : 100
+                column.headerCell.alignment = .right
                 tableView.addTableColumn(column)
-                print("Index:", i)
             }
         }
 
